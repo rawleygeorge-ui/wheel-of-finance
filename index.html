@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wheel of Finance – spin, guess, solve</title>
+<meta name="description" content="Spin the wheel, call letters and solve the finance phrase before the Audit wipes your bank. A game-show word game for finance people.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Wheel of Finance – can you beat my score?">
+<meta property="og:description" content="Spin the wheel, call letters, solve the finance phrase. Watch out for the Audit.">
+<meta property="og:url" content="https://rawleygeorge-ui.github.io/wheel-of-finance/">
+<meta property="og:image" content="https://rawleygeorge-ui.github.io/wheel-of-finance/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="627">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%23ffc83d'/%3E%3Ccircle cx='16' cy='16' r='11' fill='%23e8338b'/%3E%3Cpath d='M16 5v22M5 16h22M8.2 8.2l15.6 15.6M23.8 8.2 8.2 23.8' stroke='%23ffc83d' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3.5' fill='%23ffc83d'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg1:#1a0b3d; --bg2:#0b0620; --ink:#fff7e6; --muted:#c9b8ff; --gold:#ffc83d; --gold2:#ff9f1c;
+  --tile:#12a46b; --tile-edge:#0b7a4f; --tile-on:#fffaf0; --pink:#ff3e9a; --cyan:#29d4ff; --red:#ff4d4d;
+  --panel:rgba(255,255,255,.06); --line:rgba(255,255,255,.14);
+}
+*{box-sizing:border-box}
+html,body{margin:0;overflow-x:hidden}
+body{min-height:100vh;color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  background:radial-gradient(1200px 700px at 50% -10%,#3b1a8f 0%,var(--bg1) 45%,var(--bg2) 100%) fixed;background-color:var(--bg2);overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background-image:radial-gradient(2px 2px at 10% 20%,#fff8,transparent),radial-gradient(1.5px 1.5px at 80% 10%,#fff7,transparent),radial-gradient(2px 2px at 30% 80%,#ffd76a88,transparent),radial-gradient(1.5px 1.5px at 70% 60%,#fff6,transparent),radial-gradient(2px 2px at 90% 85%,#ff9ad588,transparent),radial-gradient(1.5px 1.5px at 50% 40%,#fff5,transparent);}
+.wrap{max-width:1120px;margin:0 auto;padding:18px 16px 36px;position:relative}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo svg{width:46px;height:46px;flex:none;filter:drop-shadow(0 0 10px #ffc83d66)}
+h1{margin:0;font-size:30px;letter-spacing:.01em;line-height:1;font-weight:900;
+  background:linear-gradient(90deg,var(--gold),#fff1b8 40%,var(--gold2));-webkit-background-clip:text;background-clip:text;color:transparent;text-shadow:0 0 30px #ffc83d33}
+.tag{color:var(--muted);font-size:13.5px;margin-top:4px}
+.hud{display:flex;gap:8px;flex-wrap:wrap}
+.chip{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 13px;font-size:14px;font-variant-numeric:tabular-nums;backdrop-filter:blur(4px)}
+.chip b{color:var(--gold)}
+.chip.bank b{color:#7dffb3}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px;color:var(--ink)}
+.icon-btn{background:var(--panel);border:1px solid var(--line);padding:6px 10px;border-radius:999px}
+.stage{display:grid;grid-template-columns:420px 1fr;gap:22px;align-items:start}
+@media (max-width:900px){.stage{grid-template-columns:minmax(0,1fr)}}
+.wheel-box{position:relative;display:flex;flex-direction:column;align-items:center}
+.wheel-wrap{position:relative;width:min(400px,78vw);aspect-ratio:1;margin-top:14px}
+.wheel-wrap::before{content:"";position:absolute;inset:-24px;border-radius:50%;
+  background:radial-gradient(circle at 50% 35%,#b0703a 0%,#7a3f15 55%,#3d1a06 100%);
+  box-shadow:0 18px 40px #000c,0 0 0 3px #2a1004,inset 0 0 0 4px #e8b84a,inset 0 0 0 7px #6b3510,inset 0 10px 18px #ffffff22}
+.wheel-wrap::after{content:"";position:absolute;inset:-24px;border-radius:50%;pointer-events:none;z-index:2;
+  background:radial-gradient(ellipse 60% 40% at 32% 22%,#ffffff2e,transparent 70%)}
+.bulbs{position:absolute;inset:-24px;border-radius:50%;pointer-events:none;container-type:inline-size;z-index:1}
+.bulbs i{position:absolute;width:10px;height:10px;left:50%;top:50%;background:linear-gradient(135deg,#fff6c8,#e8b84a 50%,#9a6a10);box-shadow:0 1px 2px #0008}
+.wheel-box::before{content:"";position:absolute;left:50%;top:0;width:min(470px,100%);height:min(470px,92vw);transform:translateX(-50%);border-radius:50%;
+  background:radial-gradient(circle,#1f7a4c 0%,#145c38 55%,transparent 72%);opacity:.55;pointer-events:none}
+.decor{position:absolute;pointer-events:none;z-index:0;filter:drop-shadow(0 8px 10px #0009)}
+.decor.cards{left:-58px;top:-14px;width:150px;transform:rotate(-22deg)}
+.decor.chipsL{left:-12px;bottom:58px;width:96px}
+.decor.chipsR{right:-6px;bottom:52px;width:104px}
+@media (max-width:900px){.decor.cards{left:auto;right:-14px;top:0;width:110px;transform:rotate(14deg)}}
+@media (max-width:520px){.decor.cards{width:96px}.decor.chipsL,.decor.chipsR{width:66px}.decor.chipsL{left:-4px;bottom:62px}.decor.chipsR{right:-2px}}
+.wheel-wrap{z-index:1}
+#wheel{position:relative;width:100%;height:100%;display:block;border-radius:50%;transition:transform 4.6s cubic-bezier(.12,.62,.08,1)}
+.pointer{position:absolute;left:50%;top:-38px;transform:translateX(-50%);width:42px;height:52px;z-index:3;filter:drop-shadow(0 4px 6px #0008)}
+.hub{position:absolute;left:50%;top:50%;width:22%;aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;z-index:2;
+  background:radial-gradient(circle at 35% 30%,#fff3c4,var(--gold) 45%,#c77700);box-shadow:0 0 0 4px #7a3d00,0 6px 14px #0009;display:grid;place-items:center;font-weight:900;color:#5a2a00;font-size:13px;letter-spacing:.05em;text-align:center;line-height:1.05}
+.spin-btn{margin-top:22px;padding:14px 34px;font-size:19px;font-weight:900;letter-spacing:.06em;color:#3a1600;
+  background:linear-gradient(180deg,#fff1b8,var(--gold) 45%,var(--gold2));box-shadow:0 6px 0 #a35300,0 10px 24px #ff9f1c55;border-radius:16px;transition:transform .08s}
+.spin-btn:active{transform:translateY(3px);box-shadow:0 3px 0 #a35300}
+.spin-btn:disabled{filter:grayscale(.7) brightness(.7);cursor:default}
+.landed{margin-top:12px;min-height:30px;font-size:18px;font-weight:800;text-align:center}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;backdrop-filter:blur(6px)}
+.cat{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.cat .label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan);font-weight:800}
+.cat .clue{font-size:17px;font-weight:700}
+.strikes{display:flex;gap:6px}
+.strikes span{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:12px;font-weight:900;background:#ffffff14;border:1px solid var(--line);color:#ffffff55}
+.strikes span.on{background:var(--red);color:#fff;border-color:#ff9a9a;box-shadow:0 0 12px #ff4d4d88}
+.board{background:linear-gradient(180deg,#0e2c5c,#081a3a);border:3px solid var(--gold);border-radius:16px;padding:14px 10px;display:flex;flex-wrap:wrap;justify-content:center;gap:10px 18px;box-shadow:inset 0 0 30px #000a,0 0 24px #29d4ff22;min-height:120px;align-content:center}
+.word{display:flex;gap:4px}
+.t{width:34px;height:44px;border-radius:6px;background:linear-gradient(180deg,#18c27f,var(--tile));border-bottom:4px solid var(--tile-edge);display:grid;place-items:center;font-size:24px;font-weight:900;color:transparent;transition:background .25s,color .25s,transform .35s}
+.t.on{background:var(--tile-on);border-bottom-color:#d9cfb8;color:#1b1340;transform:rotateX(360deg)}
+.t.flash{background:#29d4ff;color:#fff}
+@media (max-width:520px){.t{width:clamp(15px,4.9vw,24px);height:clamp(24px,7.4vw,34px);font-size:clamp(12px,4.2vw,18px);border-bottom-width:3px}.word{gap:2px}.board{gap:8px 12px;padding:12px 8px}.panel{padding:12px}}
+.msg{min-height:26px;margin:12px 2px 4px;font-weight:700;color:#ffe9a8}
+.keys{display:grid;grid-template-columns:repeat(13,1fr);gap:6px;margin-top:8px}
+@media (max-width:520px){.keys{grid-template-columns:repeat(9,1fr)}}
+.k{padding:10px 0;font-weight:800;font-size:15px;background:#ffffff12;border:1px solid var(--line);border-radius:9px;transition:background .15s,transform .05s}
+.k:hover:not(:disabled){background:#ffffff26}
+.k:active:not(:disabled){transform:scale(.94)}
+.k.vowel{background:#ff3e9a26;border-color:#ff3e9a66;color:#ffd0e6}
+.k:disabled{opacity:.28;cursor:default}
+.k.hit{background:#12a46b!important;opacity:.55}
+.k.miss{background:#ff4d4d!important;opacity:.45}
+.acts{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.btn{padding:11px 18px;font-weight:800;border-radius:12px;border:1px solid var(--line);background:#ffffff14}
+.btn.solve{background:linear-gradient(180deg,#38e0ff,#1c9fd6);color:#04263a;border:0;box-shadow:0 4px 0 #0b6a93}
+.btn:disabled{opacity:.4;cursor:default}
+.hint{color:var(--muted);font-size:13px;margin-top:10px}
+.overlay{position:fixed;inset:0;background:#06021acc;display:grid;place-items:center;z-index:20;padding:16px;backdrop-filter:blur(3px)}
+.modal{width:min(520px,100%);background:linear-gradient(180deg,#2a1470,#160a40);border:2px solid var(--gold);border-radius:20px;padding:22px;text-align:center;box-shadow:0 0 50px #ffc83d44}
+.modal h2{margin:0 0 6px;font-size:26px;color:var(--gold)}
+.modal p{margin:8px 0;color:#efe6ff}
+.modal .big{font-size:52px;font-weight:900;color:#7dffb3;font-variant-numeric:tabular-nums;margin:6px 0}
+.modal input{width:100%;padding:12px 14px;border-radius:12px;border:2px solid var(--line);background:#0b0620;color:#fff;font:700 18px system-ui;text-transform:uppercase;letter-spacing:.06em;margin:10px 0}
+.modal .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.def{background:#ffffff10;border-radius:12px;padding:10px 12px;margin-top:10px;text-align:left;font-size:14px}
+.def b{color:var(--cyan)}
+.how{text-align:left;margin:10px 0 0;padding-left:1.1em;color:#efe6ff;font-size:14.5px}
+.how li{margin:4px 0}
+.hidden{display:none!important}
+footer{margin-top:26px;text-align:center;color:var(--muted);font-size:13px;line-height:1.7}
+footer a{color:var(--gold)}
+#confetti{position:fixed;left:0;top:0;width:100vw;height:100vh;pointer-events:none;z-index:30}
+.shake{animation:shake .45s}
+@keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+@media (prefers-reduced-motion:reduce){#wheel{transition-duration:1.2s}.t.on{transform:none}}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+  <header>
+    <div class="logo">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="15" fill="#ffc83d"/><circle cx="16" cy="16" r="11" fill="#e8338b"/><path d="M16 5v22M5 16h22M8.2 8.2l15.6 15.6M23.8 8.2 8.2 23.8" stroke="#ffc83d" stroke-width="2"/><circle cx="16" cy="16" r="3.5" fill="#ffc83d"/></svg>
+      <div><h1>WHEEL OF FINANCE</h1><div class="tag">Spin. Call a letter. Solve the phrase. Don't get audited.</div></div>
+    </div>
+    <div class="hud">
+      <span class="chip">Puzzle <b id="hRound">1</b>/5</span>
+      <span class="chip bank">Bank <b id="hBank">0</b></span>
+      <span class="chip">Total <b id="hTotal">0</b></span>
+      <button class="icon-btn" id="muteBtn" aria-label="Toggle sound">🔊</button>
+    </div>
+  </header>
+
+  <div class="stage">
+    <div class="wheel-box">
+      <svg class="decor cards" viewBox="0 0 150 130" aria-hidden="true">
+  <g transform="rotate(-18 60 120)"><rect x="18" y="10" width="64" height="92" rx="8" fill="#fffdf6" stroke="#d8d0bd"/><text x="27" y="30" font-family="Georgia,serif" font-size="16" font-weight="700" fill="#111">A</text><text x="50" y="72" text-anchor="middle" font-family="Georgia,serif" font-size="34" font-weight="700" fill="#111">$</text></g>
+  <g transform="rotate(-2 75 120)"><rect x="43" y="6" width="64" height="92" rx="8" fill="#fffdf6" stroke="#d8d0bd"/><text x="52" y="26" font-family="Georgia,serif" font-size="16" font-weight="700" fill="#c41e3a">A</text><text x="75" y="68" text-anchor="middle" font-family="Georgia,serif" font-size="34" font-weight="700" fill="#c41e3a">€</text></g>
+  <g transform="rotate(16 90 120)"><rect x="68" y="10" width="64" height="92" rx="8" fill="#fffdf6" stroke="#d8d0bd"/><text x="77" y="30" font-family="Georgia,serif" font-size="16" font-weight="700" fill="#111">A</text><text x="100" y="72" text-anchor="middle" font-family="Georgia,serif" font-size="34" font-weight="700" fill="#111">£</text></g>
+</svg>
+      <svg class="decor chipsL" viewBox="0 0 100 140" aria-hidden="true"><g><path d="M8 120v8a42 13 0 0 0 84 0v-8" fill="#c41e3a" stroke="#0004"/><path d="M8 124a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="120" rx="42" ry="13" fill="#c41e3a" stroke="#0005"/><ellipse cx="50" cy="120" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="120" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 111v8a42 13 0 0 0 84 0v-8" fill="#c41e3a" stroke="#0004"/><path d="M8 115a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="111" rx="42" ry="13" fill="#c41e3a" stroke="#0005"/><ellipse cx="50" cy="111" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="111" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 102v8a42 13 0 0 0 84 0v-8" fill="#111827" stroke="#0004"/><path d="M8 106a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="102" rx="42" ry="13" fill="#111827" stroke="#0005"/><ellipse cx="50" cy="102" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="102" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 93v8a42 13 0 0 0 84 0v-8" fill="#c41e3a" stroke="#0004"/><path d="M8 97a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="93" rx="42" ry="13" fill="#c41e3a" stroke="#0005"/><ellipse cx="50" cy="93" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="93" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 84v8a42 13 0 0 0 84 0v-8" fill="#1d4ed8" stroke="#0004"/><path d="M8 88a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="84" rx="42" ry="13" fill="#1d4ed8" stroke="#0005"/><ellipse cx="50" cy="84" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="84" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 75v8a42 13 0 0 0 84 0v-8" fill="#c41e3a" stroke="#0004"/><path d="M8 79a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="75" rx="42" ry="13" fill="#c41e3a" stroke="#0005"/><ellipse cx="50" cy="75" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="75" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g></svg>
+      <svg class="decor chipsR" viewBox="0 0 100 140" aria-hidden="true"><g><path d="M8 120v8a42 13 0 0 0 84 0v-8" fill="#15803d" stroke="#0004"/><path d="M8 124a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="120" rx="42" ry="13" fill="#15803d" stroke="#0005"/><ellipse cx="50" cy="120" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="120" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 111v8a42 13 0 0 0 84 0v-8" fill="#15803d" stroke="#0004"/><path d="M8 115a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="111" rx="42" ry="13" fill="#15803d" stroke="#0005"/><ellipse cx="50" cy="111" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="111" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 102v8a42 13 0 0 0 84 0v-8" fill="#111827" stroke="#0004"/><path d="M8 106a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="102" rx="42" ry="13" fill="#111827" stroke="#0005"/><ellipse cx="50" cy="102" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="102" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 93v8a42 13 0 0 0 84 0v-8" fill="#7c3aed" stroke="#0004"/><path d="M8 97a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="93" rx="42" ry="13" fill="#7c3aed" stroke="#0005"/><ellipse cx="50" cy="93" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="93" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g><g><path d="M8 84v8a42 13 0 0 0 84 0v-8" fill="#15803d" stroke="#0004"/><path d="M8 88a42 13 0 0 0 84 0" fill="none" stroke="#fff" stroke-width="3" stroke-dasharray="9 9" opacity=".85"/><ellipse cx="50" cy="84" rx="42" ry="13" fill="#15803d" stroke="#0005"/><ellipse cx="50" cy="84" rx="42" ry="13" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="10 12" opacity=".9"/><ellipse cx="50" cy="84" rx="27" ry="8" fill="none" stroke="#ffffffaa" stroke-width="1.5"/></g></svg>
+      <div class="wheel-wrap">
+        <div class="bulbs" id="bulbs"></div>
+        <svg class="pointer" viewBox="0 0 42 52" aria-hidden="true"><defs><linearGradient id="pg" x1="0" x2="1"><stop offset="0" stop-color="#fff6c8"/><stop offset=".5" stop-color="#e8b84a"/><stop offset="1" stop-color="#9a6a10"/></linearGradient></defs><path d="M21 50 3 12A18 18 0 1 1 39 12Z" fill="url(#pg)" stroke="#6b3510" stroke-width="2.5"/><circle cx="21" cy="16" r="6.5" fill="#fff" stroke="#b22" stroke-width="3"/></svg>
+        <svg id="wheel" viewBox="0 0 400 400" aria-label="Prize wheel"></svg>
+      </div>
+      <button class="spin-btn" id="spinBtn">SPIN</button>
+      <div class="landed" id="landed"></div>
+    </div>
+
+    <div class="panel">
+      <div class="cat">
+        <div><div class="label">Rhyming clue</div><div class="clue" id="clue">…</div></div>
+        <div class="strikes" id="strikes" title="Strikes: 3 and the puzzle is lost"><span>✕</span><span>✕</span><span>✕</span></div>
+      </div>
+      <div class="board" id="board"></div>
+      <div class="msg" id="msg">Spin the wheel to start.</div>
+      <div class="keys" id="keys"></div>
+      <div class="acts">
+        <button class="btn solve" id="solveBtn">Solve the puzzle</button>
+        <button class="btn" id="vowelHint">Vowels cost 250</button>
+      </div>
+      <div class="hint">Consonants earn the wheel value for every time they appear. Buying a vowel costs 250 from your bank. AUDIT wipes your bank, FREEZE costs a strike, and 3 strikes lose the puzzle.</div>
+    </div>
+  </div>
+
+  <footer>
+    Built by <a href="https://www.linkedin.com/in/rawley-george-884547272" target="_blank" rel="noopener">Rawley George</a>, a finance operations and automation professional.<br>
+    <a href="https://github.com/rawleygeorge-ui/wheel-of-finance" target="_blank" rel="noopener">Source on GitHub</a> · Just a game, with no real money involved.<br>
+    © 2026 Rawley George · Designed by rawsploit@gmail.com
+  </footer>
+</div>
+
+<div class="overlay" id="startOv">
+  <div class="modal">
+    <h2>🎡 Wheel of Finance</h2>
+    <p>Five finance phrases are hidden on the board. How much can you bank?</p>
+    <ol class="how">
+      <li><b>Spin</b> the wheel, then call a <b>consonant</b>. Each time it appears, you earn the value you landed on.</li>
+      <li><b>Buy a vowel</b> for 250 when you need a nudge.</li>
+      <li><b>Solve</b> any time to bank your winnings, plus a 500 bonus.</li>
+      <li>Watch out: <b style="color:#ff8a8a">AUDIT</b> wipes your bank, and <b style="color:#9ad9ff">FREEZE</b> or a wrong letter costs a strike. 3 strikes and the puzzle is lost.</li>
+    </ol>
+    <p id="bestLine" style="color:#c9b8ff;font-size:14px"></p>
+    <div class="row"><button class="spin-btn" id="playBtn" style="margin-top:6px">LET'S PLAY</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="solveOv">
+  <div class="modal">
+    <h2>Solve the puzzle</h2>
+    <p id="solveClue"></p>
+    <input id="solveIn" autocomplete="off" spellcheck="false" placeholder="Type the full phrase">
+    <div class="row"><button class="btn solve" id="solveGo">Lock it in</button><button class="btn" id="solveCancel">Cancel</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="roundOv">
+  <div class="modal">
+    <h2 id="rTitle"></h2>
+    <p id="rPhrase" style="font-size:20px;font-weight:900;letter-spacing:.04em;color:#fff"></p>
+    <div class="big" id="rPts"></div>
+    <div class="def" id="rDef"></div>
+    <div class="row"><button class="spin-btn" id="rNext" style="margin-top:8px">NEXT PUZZLE</button></div>
+  </div>
+</div>
+
+<div class="overlay hidden" id="endOv">
+  <div class="modal">
+    <h2>Final bank</h2>
+    <div class="big" id="eScore"></div>
+    <p id="eLine"></p>
+    <p id="eBest" style="color:#c9b8ff"></p>
+    <div class="row">
+      <button class="btn solve" id="shareBtn">Copy my score to share</button>
+      <button class="btn" id="againBtn">Play again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+const $=id=>document.getElementById(id);
+const PUZZLES=[
+ ["HAIRCUT", "Snip and trim in the barber's chair, a little lighter up top with care", "The discount a lender applies to collateral. Pledge 100 of bonds and you might only borrow 90."],
+ ["HIGH WATER MARK", "Where the flood climbed up the hall, before the river took its fall", "A fund's previous peak value. Managers only earn performance fees once they're back above it."],
+ ["CIRCUIT BREAKER", "Kettle, heater, toaster too, now the whole house is dark for you", "An automatic trading halt that kicks in when an index falls too far, too fast."],
+ ["DEAD CAT BOUNCE", "A little hop from one who's gone, before the final fall goes on", "A brief recovery in a falling stock that fizzles out before the decline continues."],
+ ["WHITE KNIGHT", "Shining armour, gallant steed, rides to help a maid in need", "A friendly buyer that rescues a company from a hostile takeover."],
+ ["POISON PILL", "One small tablet, bitter and grim, swallow it and your chances dim", "A defence that makes a hostile takeover too expensive, often by flooding the market with new shares."],
+ ["GOLDEN PARACHUTE", "Leap from the plane in gilded style, drift down gently with a smile", "A lavish payout promised to executives if they lose their job after a takeover."],
+ ["BEAR HUG", "Big and furry, squeezing tight, a forest cuddle late at night", "A takeover offer so generous that the target's board can hardly say no."],
+ ["SHARK REPELLENT", "Spray it on before you swim, keep those fins away from limb", "Measures in a company's rules that scare off unwanted takeover bids."],
+ ["FAT FINGER", "A chubby digit on the keys, hits the wrong one with such ease", "A keying error, such as an extra zero, that sends a huge order into the market by mistake."],
+ ["UNICORN", "A horse with a horn from a fairy tale, in storybooks it leaves a trail", "A private start-up valued at over a billion dollars."],
+ ["BLACK SWAN", "A bird on the lake in midnight dress, rarer than you'd ever guess", "A rare, unpredictable event with massive impact, such as a sudden market crash."],
+ ["PUMP AND DUMP", "Blow the tyre up big and round, then let it flop down to the ground", "A scheme that hypes a cheap stock to push the price up, then sells out at the top."],
+ ["DRY POWDER", "Keep it safe from rain and damp, or the musket won't fire in camp", "Cash a fund has raised but not yet invested, ready for the next deal."],
+ ["BULL MARKET", "Horns and hooves at the county fair, stalls of cattle everywhere", "A long period of rising prices and confident investors."],
+ ["BEAR MARKET", "Honey stalls in the forest square, furry traders everywhere", "A fall of 20% or more from recent highs, with pessimism to match."],
+ ["SANTA CLAUS RALLY", "Reindeer racing through the night, sleigh bells ringing, chimneys bright", "The tendency for stocks to rise in the last days of December."],
+ ["WINDOW DRESSING", "Mannequins posed behind the glass, smartened up for those who pass", "Buying the year's winners just before reporting so the portfolio looks better than it performed."],
+ ["FLOAT", "Bobbing on the fishing line, a little cork that says it's fine", "Cash in transit between accounts, or the shares freely available to trade after an IPO."],
+ ["STRADDLE", "One leg here and one leg there, perched on the fence in open air", "Buying both a call and a put, which profits if the price moves a lot either way."],
+ ["BUTTERFLY SPREAD", "Wings of orange, wings of blue, open wide in morning dew", "An options strategy that profits if the price stays close to a target."],
+ ["IRON CONDOR", "A metal bird with wings so wide, gliding over the mountainside", "A four-option strategy that profits when the price stays inside a range."],
+ ["CHURNING", "Turn the handle round and round, till the cream to butter's ground", "Excessive trading in a client's account just to generate commission."],
+ ["WASH TRADE", "Soap and suds, a scrub and rinse, the laundromat's been busy since", "Buying and selling the same asset to yourself to fake trading volume. It's illegal."],
+ ["FRONT RUNNING", "Out in the lead from the starting gun, first past the tape and the race is won", "Trading ahead of a client's large order to profit from the move it causes. Also illegal."],
+ ["HOCKEY STICK", "Slap the puck across the ice, curved at the end, it's rather nice", "A forecast that stays flat for years, then shoots straight up."],
+ ["MOAT", "Water circles the castle wall, keeping invaders out of the hall", "A lasting competitive advantage that protects a company's profits."],
+ ["RAINMAKER", "Dances so the clouds will pour, till the fields grow green once more", "The person who brings in the big clients and the big fees."],
+ ["FALLEN ANGEL", "Wings once bright and halo pure, tumbled down from heaven's door", "A bond that was investment grade but has been downgraded to junk."],
+ ["HAWK", "Circling high with eyes so keen, swooping down on what it's seen", "A central banker who favours higher interest rates to fight inflation."]
+];
+const VOWELS="AEIOU";
+// segments: [label, value, color, textColor]
+const SEG=[
+ ["500",500,"#ff3e9a"],["FREEZE","freeze","#bfe9ff","#0b3d66"],["300",300,"#ffc83d","#4a2500"],["800",800,"#7b5cff"],
+ ["200",200,"#12c27f"],["AUDIT","audit","#111111","#ff6b6b"],["600",600,"#29d4ff","#04263a"],["250",250,"#ff8a3d"],
+ ["1000",1000,"#e8338b"],["150",150,"#9be15d","#173300"],["JACKPOT",2500,"#ffd700","#5a2a00"],["400",400,"#5b8cff"],
+ ["DOUBLE","double","#ff5fd2"],["350",350,"#2dd4bf","#043a33"],["700",700,"#a855f7"],["100",100,"#f97316"]
+];
+const N=SEG.length, SA=360/N;
+
+let rot=0, spinning=false, puzzle=null, revealed=new Set(), used=new Set(), bank=0, total=0, strikes=0, round=0, phase="spin", landedVal=null, order=[], solvedCount=0, sound=true;
+
+// ---------- wheel ----------
+function polar(a,r){const t=a*Math.PI/180;return[200+r*Math.sin(t),200-r*Math.cos(t)];}
+function drawWheel(){
+  const w=$("wheel"); const R=200, RS=168, RP=196;
+  let h=`<defs>
+    <radialGradient id="gold" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#fff6c8"/><stop offset=".45" stop-color="#e8b84a"/><stop offset="1" stop-color="#8a5a08"/></radialGradient>
+    <radialGradient id="cone" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#7a3f15"/><stop offset=".7" stop-color="#a0602a"/><stop offset="1" stop-color="#5a2a0e"/></radialGradient>
+    <radialGradient id="shade" cx="50%" cy="50%" r="50%"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></radialGradient>
+  </defs>`;
+  // pocket ring (roulette style)
+  const PN=48, pa=360/PN;
+  for(let i=0;i<PN;i++){const a0=i*pa,a1=(i+1)*pa,[x0,y0]=polar(a0,RP),[x1,y1]=polar(a1,RP),[x2,y2]=polar(a1,RS+2),[x3,y3]=polar(a0,RS+2);
+    const c=i%12===0?"#0f7a3f":(i%2?"#111":"#b3122e");
+    h+=`<path d="M${x0} ${y0}A${RP} ${RP} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${RS+2} ${RS+2} 0 0 0 ${x3} ${y3}Z" fill="${c}" stroke="#e8b84a" stroke-width=".8"/>`;}
+  h+=`<circle cx="200" cy="200" r="${RS+2}" fill="none" stroke="url(#gold)" stroke-width="4"/>`;
+  SEG.forEach((s,i)=>{
+    const a0=i*SA,a1=(i+1)*SA,[x0,y0]=polar(a0,RS),[x1,y1]=polar(a1,RS);
+    h+=`<path d="M200 200L${x0} ${y0}A${RS} ${RS} 0 0 1 ${x1} ${y1}Z" fill="${s[2]}"/>`;
+    const mid=a0+SA/2, tc=s[3]||"#ffffff", fs=s[0].length>5?12:s[0].length>3?16:19, ty=s[0].length>4?44:48;
+    h+=`<g transform="rotate(${mid} 200 200)"><text x="200" y="${ty}" transform="rotate(90 200 ${ty})" fill="${tc}" font-family="system-ui,sans-serif" font-weight="900" font-size="${fs}" dominant-baseline="middle" style="letter-spacing:.04em;paint-order:stroke" stroke="#0003" stroke-width="2">${s[0]}</text></g>`;
+  });
+  for(let i=0;i<N;i++){const [x,y]=polar(i*SA,RS);h+=`<line x1="200" y1="200" x2="${x}" y2="${y}" stroke="url(#gold)" stroke-width="2.4"/>`;}
+  h+=`<circle cx="200" cy="200" r="${RS}" fill="url(#shade)"/>`;
+  // centre cone + turret
+  h+=`<circle cx="200" cy="200" r="62" fill="url(#cone)" stroke="url(#gold)" stroke-width="4"/>
+      <circle cx="200" cy="200" r="44" fill="none" stroke="#e8b84a" stroke-width="1.2" opacity=".6"/>`;
+  [0,90,180,270].forEach(a=>{const [x,y]=polar(a,46);h+=`<line x1="200" y1="200" x2="${x}" y2="${y}" stroke="url(#gold)" stroke-width="7" stroke-linecap="round"/><circle cx="${x}" cy="${y}" r="8" fill="url(#gold)" stroke="#6b4206" stroke-width="1"/>`;});
+  h+=`<circle cx="200" cy="200" r="20" fill="url(#gold)" stroke="#6b4206" stroke-width="1.2"/><circle cx="200" cy="200" r="9" fill="url(#gold)" stroke="#6b4206"/><circle cx="196" cy="195" r="3" fill="#fff" opacity=".8"/>`;
+  w.innerHTML=h;
+  const b=$("bulbs"); let bh="";
+  for(let i=0;i<16;i++){const a=(i*22.5+11.25)*Math.PI/180;bh+=`<i style="transform:translate(-50%,-50%) translate(${Math.sin(a)*46.3}cqw,${-Math.cos(a)*46.3}cqw) rotate(45deg)"></i>`;}
+  b.innerHTML=bh;
+}
+
+// ---------- sound ----------
+let ac=null;
+function tone(f,d=.06,type="square",v=.05,delay=0){
+  if(!sound) return; try{
+    ac=ac||new (window.AudioContext||window.webkitAudioContext)();
+    const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+delay;
+    o.type=type;o.frequency.value=f;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+    o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d+.02);
+  }catch(e){}
+}
+const chime=()=>[523,659,784,1047].forEach((f,i)=>tone(f,.18,"triangle",.07,i*.09));
+const buzz=()=>{tone(140,.25,"sawtooth",.05);tone(110,.3,"sawtooth",.04,.1);};
+const ding=()=>tone(1320,.12,"sine",.08);
+
+// ---------- game ----------
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function newGame(){
+  order=shuffle(PUZZLES.slice()).slice(0,5); round=0; total=0; solvedCount=0;
+  $("hTotal").textContent=0; loadPuzzle();
+}
+function loadPuzzle(){
+  puzzle=order[round]; revealed=new Set(); used=new Set(); bank=0; strikes=0; phase="spin"; landedVal=null;
+  $("hRound").textContent=round+1; $("clue").textContent=puzzle[1]+"  ("+puzzle[0].split(" ").map(w=>w.length).join(", ")+")";
+  renderBoard(); renderKeys(); updateHud(); setMsg("Spin the wheel!"); $("landed").textContent="";
+}
+function renderBoard(flash){
+  const b=$("board"); b.innerHTML="";
+  puzzle[0].split(" ").forEach(w=>{
+    const wd=document.createElement("div");wd.className="word";
+    [...w].forEach(ch=>{const t=document.createElement("div");t.className="t"+(revealed.has(ch)?" on":"")+(flash===ch?" flash":"");t.textContent=ch;wd.appendChild(t);});
+    b.appendChild(wd);
+  });
+  if(flash) setTimeout(()=>b.querySelectorAll(".flash").forEach(t=>t.classList.remove("flash")),500);
+}
+function renderKeys(){
+  const k=$("keys");k.innerHTML="";
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").forEach(L=>{
+    const b=document.createElement("button");b.className="k"+(VOWELS.includes(L)?" vowel":"");b.textContent=L;b.dataset.l=L;
+    b.onclick=()=>pickLetter(L);k.appendChild(b);
+  });
+  refreshKeys();
+}
+function refreshKeys(){
+  document.querySelectorAll(".k").forEach(b=>{
+    const L=b.dataset.l, v=VOWELS.includes(L);
+    if(used.has(L)){b.disabled=true;b.classList.toggle("hit",puzzle[0].includes(L));b.classList.toggle("miss",!puzzle[0].includes(L));return;}
+    b.disabled = spinning || (v ? !(phase==="spin" && bank>=250) : phase!=="guess");
+  });
+  $("spinBtn").disabled = spinning || phase!=="spin" || remainingConsonants()===0;
+  $("solveBtn").disabled = spinning || phase!=="spin";
+}
+function remainingConsonants(){return [...new Set(puzzle[0].replace(/[^A-Z]/g,""))].filter(c=>!VOWELS.includes(c)&&!revealed.has(c)).length;}
+function updateHud(){
+  $("hBank").textContent=bank.toLocaleString("en-US");$("hTotal").textContent=total.toLocaleString("en-US");
+  document.querySelectorAll("#strikes span").forEach((s,i)=>s.classList.toggle("on",i<strikes));
+}
+function setMsg(t){$("msg").textContent=t;}
+function strike(reason){
+  strikes++;updateHud();buzz();$("board").classList.add("shake");setTimeout(()=>$("board").classList.remove("shake"),450);
+  if(strikes>=3){setMsg(reason+" That's 3 strikes.");setTimeout(()=>endRound(false),700);return true;}
+  setMsg(reason+` Strike ${strikes} of 3.`);return false;
+}
+
+function spin(){
+  if(spinning||phase!=="spin") return;
+  spinning=true; refreshKeys(); $("landed").textContent=""; setMsg("Spinning…");
+  const k=Math.floor(Math.random()*N), a=k*SA+SA*(0.2+Math.random()*0.6);
+  const cur=((rot%360)+360)%360, delta=((360-a)-cur+720)%360;
+  rot+=360*(5+Math.floor(Math.random()*2))+delta;
+  const w=$("wheel"); w.style.transform=`rotate(${rot}deg)`;
+  let last=-1; const t0=performance.now();
+  (function tick(){
+    const m=new DOMMatrix(getComputedStyle(w).transform), ang=((Math.atan2(m.b,m.a)*180/Math.PI)+360)%360;
+    const idx=Math.floor(((360-ang)%360)/SA); if(idx!==last){last=idx;tone(900,.02,"square",.025);}
+    if(performance.now()-t0<4700) requestAnimationFrame(tick);
+  })();
+  setTimeout(()=>land(k),4700);
+}
+function land(k){
+  spinning=false; const s=SEG[k];
+  if(s[1]==="audit"){bank=0;updateHud();buzz();$("landed").innerHTML=`<span style="color:#ff6b6b">AUDIT!</span> Your bank is wiped.`;setMsg("The auditors found something. Bank reset to 0. Spin again.");phase="spin";refreshKeys();return;}
+  if(s[1]==="freeze"){$("landed").innerHTML=`<span style="color:#9ad9ff">FREEZE!</span> Account frozen.`;phase="spin";if(!strike("Account frozen."))refreshKeys();return;}
+  landedVal=s[1]; phase="guess";
+  $("landed").innerHTML= s[1]==="double" ? `<span style="color:#ff9ae6">DOUBLE!</span> A correct consonant doubles your bank.` : s[0]==="JACKPOT" ? `<span style="color:#ffd700">JACKPOT! 2,500</span> per letter` : `Landed on <span style="color:var(--gold)">${s[1]}</span>`;
+  if(s[0]==="JACKPOT") chime(); else ding();
+  setMsg("Call a consonant."); refreshKeys();
+}
+function pickLetter(L){
+  if(spinning||used.has(L)) return;
+  const v=VOWELS.includes(L);
+  if(v){ if(phase!=="spin"||bank<250) return; bank-=250; }
+  else if(phase!=="guess") return;
+  used.add(L);
+  const count=[...puzzle[0]].filter(c=>c===L).length;
+  if(count){
+    revealed.add(L);
+    if(!v){ if(landedVal==="double"){bank=Math.max(bank*2,bank+500);} else bank+=landedVal*count; }
+    renderBoard(L); chime();
+    setMsg(v?`Bought ${L}: ${count} on the board.`:`Yes! ${count} × ${L}.${landedVal==="double"?" Bank doubled!":` +${(landedVal*count).toLocaleString("en-US")}`}`);
+    phase="spin"; updateHud(); refreshKeys();
+    if([...puzzle[0].replace(/ /g,"")].every(c=>revealed.has(c))){setTimeout(()=>endRound(true),600);return;}
+    if(remainingConsonants()===0) setMsg("No consonants left. Buy a vowel or solve!");
+  } else {
+    phase="spin"; updateHud();
+    if(!strike(`No ${L} in this one.`)) refreshKeys();
+  }
+}
+function openSolve(){ if(phase!=="spin"||spinning) return; $("solveClue").textContent=$("clue").textContent; $("solveIn").value=""; $("solveOv").classList.remove("hidden"); setTimeout(()=>$("solveIn").focus(),50); }
+function trySolve(){
+  const g=$("solveIn").value.toUpperCase().replace(/[^A-Z]/g,""), ans=puzzle[0].replace(/[^A-Z]/g,"");
+  $("solveOv").classList.add("hidden");
+  if(!g) return;
+  if(g===ans){ [...ans].forEach(c=>revealed.add(c)); renderBoard(); endRound(true); }
+  else { if(!strike("That's not it.")) refreshKeys(); }
+}
+function endRound(won){
+  phase="done"; refreshKeys(); [...puzzle[0]].forEach(c=>c!==" "&&revealed.add(c)); renderBoard();
+  let pts=0;
+  if(won){pts=bank+500;total+=pts;solvedCount++;confetti();chime();}
+  updateHud();
+  $("rTitle").textContent=won?"🎉 Solved!":"💥 Puzzle lost";
+  $("rPhrase").textContent=puzzle[0];
+  $("rPts").textContent=won?`+${pts.toLocaleString("en-US")}`:"+0";
+  $("rPts").style.color=won?"#7dffb3":"#ff8a8a";
+  $("rDef").innerHTML=`<b>What it means:</b> ${puzzle[2]}`;
+  $("rNext").textContent=round<4?"NEXT PUZZLE":"SEE FINAL BANK";
+  setTimeout(()=>$("roundOv").classList.remove("hidden"),won?500:300);
+}
+function nextRound(){
+  $("roundOv").classList.add("hidden");
+  round++; if(round<5) loadPuzzle(); else finish();
+}
+function best(){try{return JSON.parse(localStorage.getItem("wof_best")||"null")}catch(e){return null}}
+function saveBest(b){try{localStorage.setItem("wof_best",JSON.stringify(b))}catch(e){}}
+function finish(){
+  $("eScore").textContent=total.toLocaleString("en-US");
+  $("eLine").textContent=`${solvedCount} of 5 puzzles solved`;
+  const b=best();
+  if(!b||total>b.score){saveBest({score:total,solved:solvedCount});$("eBest").textContent=b?"🏆 New personal best!":"Your first score is on the board.";if(total>0)confetti();}
+  else $("eBest").textContent=`Your best: ${b.score.toLocaleString("en-US")} (${b.solved}/5 solved)`;
+  $("endOv").classList.remove("hidden");
+}
+
+// ---------- confetti ----------
+function confetti(){
+  const c=$("confetti"),x=c.getContext("2d");c.width=innerWidth;c.height=innerHeight;
+  const cols=["#ffc83d","#ff3e9a","#29d4ff","#7dffb3","#a855f7","#ff8a3d"];
+  const P=Array.from({length:160},()=>({x:innerWidth/2+(Math.random()-.5)*200,y:innerHeight*0.35,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,r:Math.random()*6+4,c:cols[Math.floor(Math.random()*cols.length)],a:Math.random()*6,va:(Math.random()-.5)*.3}));
+  let f=0;(function draw(){x.clearRect(0,0,c.width,c.height);P.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.vx*=.99;p.a+=p.va;x.save();x.translate(p.x,p.y);x.rotate(p.a);x.fillStyle=p.c;x.fillRect(-p.r/2,-p.r/4,p.r,p.r/2);x.restore();});
+    if(++f<150)requestAnimationFrame(draw);else x.clearRect(0,0,c.width,c.height);})();
+}
+
+// ---------- wiring ----------
+$("spinBtn").onclick=spin;
+$("solveBtn").onclick=openSolve;
+$("solveGo").onclick=trySolve;
+$("solveCancel").onclick=()=>$("solveOv").classList.add("hidden");
+$("solveIn").addEventListener("keydown",e=>{if(e.key==="Enter")trySolve();if(e.key==="Escape")$("solveOv").classList.add("hidden");});
+$("rNext").onclick=nextRound;
+$("playBtn").onclick=()=>{$("startOv").classList.add("hidden");newGame();};
+$("againBtn").onclick=()=>{$("endOv").classList.add("hidden");newGame();};
+$("vowelHint").onclick=()=>setMsg(bank>=250&&phase==="spin"?"Tap a pink vowel to buy it for 250.":"You need 250 in the bank, and must be between spins, to buy a vowel.");
+$("muteBtn").onclick=()=>{sound=!sound;$("muteBtn").textContent=sound?"🔊":"🔇";};
+$("shareBtn").onclick=async()=>{
+  const url=location.href.split("#")[0];
+  const t=`🎡 I banked ${total.toLocaleString("en-US")} on Wheel of Finance and solved ${solvedCount}/5 finance phrases. Can you beat me? ${url}`;
+  try{await navigator.clipboard.writeText(t);setMsg("Copied! Paste it into a LinkedIn comment.");$("shareBtn").textContent="Copied ✓";}catch(e){prompt("Copy this:",t);}
+};
+document.addEventListener("keydown",e=>{
+  if(!$("solveOv").classList.contains("hidden")||!$("startOv").classList.contains("hidden")) return;
+  if(e.key===" "&&!$("spinBtn").disabled){e.preventDefault();spin();return;}
+  const L=e.key.toUpperCase(); if(/^[A-Z]$/.test(L)){const b=document.querySelector(`.k[data-l="${L}"]`); if(b&&!b.disabled) pickLetter(L);}
+});
+drawWheel();
+puzzle=PUZZLES[0]; renderBoard(); renderKeys();
+const b=best(); if(b) $("bestLine").textContent=`Your best so far: ${b.score.toLocaleString("en-US")} (${b.solved}/5 solved)`;
+})();
+</script>
+</body>
+</html>
